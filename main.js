@@ -3,6 +3,47 @@ const api = {
     base: "https://api.openweathermap.org/data/2.5/"
     
 }
+// Showing current location weather
+    const currentlocation = document.querySelector('.currentlocation');
+    currentlocation.addEventListener("click",()=> {
+        let lon;
+        let lat;
+        if(navigator.geolocation)
+        {
+            navigator.geolocation.getCurrentPosition((position)=> {
+                lon= position.coords.longitude;
+                lat=position.coords.latitude;
+                const proxy = "https://cors-anywhere.herokuapp.com/"
+                const api=`${proxy}api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=795da2764b6e1a0fab2d2d4afc9d72a6`;
+                fetch(api)
+                    .then((response) => {
+                    return response.json();
+                })
+                .then(displayResults1)
+            })
+        }
+        
+    })
+
+    function displayResults1 (weather) {
+        // console.log(weather);
+        let city = document.querySelector('.location .city');
+        city.innerText = `${weather.name}, ${weather.sys.country}`;
+    
+        let now = new Date();
+        let date = document.querySelector('.location .date');
+        date.innerText = dateBuilder(now);
+    
+        let temp = document.querySelector('.current .temp');
+        temp.innerHTML = `${Math.round(weather.main.temp-273)}<span>°C</span>`;
+    
+        let weather_el = document.querySelector('.current .weather');
+        weather_el.innerText= weather.weather[0].main;
+    
+        let hilow = document.querySelector('.hi-low')
+        hilow.innerText= `${Math.floor(weather.main.temp_min-273)}°C (min) / ${Math.floor(weather.main.temp_max-273)}°C (max)`;
+    }
+// showing the searched location weather
 
 const searchbox = document.querySelector('.search-box');
 searchbox.addEventListener('keypress',setQuery);
@@ -18,7 +59,7 @@ function getResults (query) {
     fetch(`${api.base}weather?q=${query}&units=metric&APPID=${api.key}`)
     .then(weather => {
         return weather.json();
-    }).then(displayResults);
+    }).then(displayResults)
 }
 
 function displayResults (weather) {
@@ -37,7 +78,7 @@ function displayResults (weather) {
     weather_el.innerText= weather.weather[0].main;
 
     let hilow = document.querySelector('.hi-low')
-    hilow.innerText= `${Math.round(weather.main.temp_min)}°C / ${Math.round(weather.main.temp_max)}°C`;
+    hilow.innerText= `${Math.floor(weather.main.temp_min)}°C (min) / ${Math.floor(weather.main.temp_max)}°C (max)`;
 }
 
 function dateBuilder (d) {
